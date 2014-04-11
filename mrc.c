@@ -91,11 +91,11 @@ void map_writeout(const char *outputLocation) {
     FILE *output = fopen(outputLocation, "w");
 
     void *tEntry = NULL;
-    while (list_pop(mapResults, &tEntry) == 1) {
+    while (list_pop(mapResults, &tEntry)) {
         MapEntry *entry = (MapEntry*)tEntry;
         fprintf(output, "%s%s%s\n", entry->key, MR_MAP_KEYVAL_SEPARATOR, entry->value);
     }
-    
+
     fclose(output);
     list_delete(mapResults);
 }
