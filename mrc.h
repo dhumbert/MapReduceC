@@ -11,7 +11,9 @@ typedef struct MapEntry {
 void map_map(char*);
 void map_sort(void);
 void map_writeout(const char*);
+static int map_emit_lua(lua_State*);
 void error(const char*);
 char *trim(char*);
+static char *alloc_string(const char*);
 static void debug_print_list(List*, int);
 #endif

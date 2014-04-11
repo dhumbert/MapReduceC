@@ -26,6 +26,9 @@ int main (int argc, char* argv[]) {
     /* run the hello.lua script */
     int dofile = luaL_dofile(l, "map.lua");
 
+    lua_pushcfunction(l, map_emit_lua);
+    lua_setglobal(l, "emit");
+
     if (dofile == 0) {
         mapResults = new_list();
         input = fopen("samples/masque.txt", "r");
@@ -60,30 +63,37 @@ int main (int argc, char* argv[]) {
     return 0;
 }
 
+static int map_emit_lua(lua_State *l) {
+    int n = lua_gettop(l); // number of args
+    if (n != 2) {
+        error("Incorrect number of arguments to emit");
+    }
+
+    if (lua_isstring(l, -1) && lua_isstring(l, -2)) {
+        size_t keylen, vallen;
+        const char *key = lua_tolstring(l, -2, &keylen);
+        const char *value = lua_tolstring(l, -1, &vallen);
+
+        if (keylen < 1) { // todo trim surrounding whitespace first
+            error("Map key must not be blank");
+        } else {
+            MapEntry *entry = malloc(sizeof(MapEntry));
+            entry->key = (void*)alloc_string(key);
+            entry->value = (void*)alloc_string(value);
+            list_append(mapResults, entry);
+        }
+    } else {
+        error("Map key and map value must both be strings.");
+    }
+
+    return 0;
+}
+
 void map_map(char *line) {
     lua_getglobal(l,"map");
     lua_pushstring(l, line);
     if (lua_pcall(l,1,1,0) != 0) {
         error(lua_tostring(l, -1));
-    } else {
-        lua_rawgeti(l, -1, 2); // value
-        lua_rawgeti(l, -2, 1); // key
-        if (lua_isstring(l, -1) && lua_isstring(l, -2)) {
-            size_t keylen, vallen;
-            const char *key = lua_tolstring(l, -1, &keylen);
-            const char *value = lua_tolstring(l, -2, &vallen);
-
-            if (keylen < 1) { // todo trim surrounding whitespace first
-                error("Map key must not be blank");
-            } else {
-                MapEntry *entry = malloc(sizeof(MapEntry));
-                entry->key = (void*)key;
-                entry->value = (void*)value;
-                list_append(mapResults, entry);
-            }
-        } else {
-            error("Map key and map value must both be strings.");
-        }
     }
 }
 
@@ -93,6 +103,7 @@ void map_writeout(const char *outputLocation) {
     void *tEntry = NULL;
     while (list_pop(mapResults, &tEntry)) {
         MapEntry *entry = (MapEntry*)tEntry;
+        printf("%s", entry->key);
         fprintf(output, "%s%s%s\n", entry->key, MR_MAP_KEYVAL_SEPARATOR, entry->value);
     }
 
@@ -180,6 +191,13 @@ char *trim(char *str)
 
 
     return str;
+}
+
+static char *alloc_string(const char *string) {
+    int len = strlen(string);
+    char *ptr = malloc(len + 1);
+    memcpy(ptr, string, len);
+    return ptr;
 }
 
 
