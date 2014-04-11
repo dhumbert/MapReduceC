@@ -4,8 +4,8 @@
 /**
  * Allocate and initialize a new list.
  */
-List *new_list() {
-	List *list = malloc(sizeof(List));
+mrc_List *mrc_new_list() {
+	mrc_List *list = malloc(sizeof(mrc_List));
 	list->head = NULL;
 	list->last = NULL;
 	list->length = 0;
@@ -15,8 +15,8 @@ List *new_list() {
 /**
  * Push a value onto the front of a list.
  */
-void list_push(List *list, void *data) {
-	Node *node = malloc(sizeof(Node));
+void mrc_list_push(mrc_List *list, void *data) {
+	mrc_Node *node = malloc(sizeof(mrc_Node));
 	node->data = data;
 	node->prev = NULL;
 	node->next = list->head;
@@ -36,8 +36,8 @@ void list_push(List *list, void *data) {
 /**
  * Append a value to the back of a list.
  */
-void list_append(List *list, void *data) {
-	Node *node = malloc(sizeof(Node));
+void mrc_list_append(mrc_List *list, void *data) {
+	mrc_Node *node = malloc(sizeof(mrc_Node));
 	node->data = data;
 	node->prev = list->last;
 
@@ -57,19 +57,19 @@ void list_append(List *list, void *data) {
 /**
  * Get the length of a list.
  */
-int list_length(List *list) {
+int mrc_list_length(mrc_List *list) {
 	return list->length;
 }
 
 /**
  * Access list elements by index, like an array.
  */
-void *list_get(List* list, int idx) {
-	if (list == NULL || list_length(list) == 0) {
+void *mrc_list_get(mrc_List* list, int idx) {
+	if (list == NULL || mrc_list_length(list) == 0) {
 		return NULL;
 	} else {
 		int i = 0;
-		Node *current = list->head;
+		mrc_Node *current = list->head;
 		while (current != NULL) {
 			if (i == idx) {
 				return current->data;
@@ -86,12 +86,12 @@ void *list_get(List* list, int idx) {
 /**
  * Pop a value off the front of a list.
  */ 
-int list_pop(List *list, void **data) {
+int mrc_list_pop(mrc_List *list, void **data) {
 	if (list->head == NULL) {
 		return 0;
 	} else {
 		*data = list->head->data;
-		list_remove(list, list->head);
+		mrc_list_remove(list, list->head);
 		return 1;
 	}
 }
@@ -99,7 +99,7 @@ int list_pop(List *list, void **data) {
 /**
  * Remove a node from a list.
  */
-void list_remove(List *list, Node *node) {
+void mrc_list_remove(mrc_List *list, mrc_Node *node) {
 	if (node == list->head && node == list->last) {
 		list->head = NULL;
 		list->last = NULL;
@@ -110,8 +110,8 @@ void list_remove(List *list, Node *node) {
 		list->last = node->prev;
 		list->last->next = NULL;
 	} else {
-		Node *after = node->next;
-		Node *before = node->prev;
+		mrc_Node *after = node->next;
+		mrc_Node *before = node->prev;
 		after->prev = before;
 		before->next = after;
 	}
@@ -120,13 +120,13 @@ void list_remove(List *list, Node *node) {
 	list->length--;
 }
 
-void list_delete(List *list) {
+void mrc_list_delete(mrc_List *list) {
 	if (list == NULL) {
 		return;
 	}
 
-	if (list_length(list) > 0) {
-		Node *current, *next;
+	if (mrc_list_length(list) > 0) {
+		mrc_Node *current, *next;
 		current = list->head;
 		while (current != NULL) {
 			next = current->next;
